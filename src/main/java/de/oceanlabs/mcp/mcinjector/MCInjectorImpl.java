@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +29,7 @@ import org.objectweb.asm.tree.MethodNode;
 import de.oceanlabs.mcp.mcinjector.adaptors.AccessFixer;
 import de.oceanlabs.mcp.mcinjector.adaptors.ApplyMap;
 import de.oceanlabs.mcp.mcinjector.adaptors.ClassInitAdder;
+import de.oceanlabs.mcp.mcinjector.adaptors.ExceptionStripper;
 import de.oceanlabs.mcp.mcinjector.adaptors.InnerClassInitAdder;
 import de.oceanlabs.mcp.mcinjector.adaptors.ParameterAnnotationFixer;
 import de.oceanlabs.mcp.mcinjector.data.Access;
@@ -44,13 +44,14 @@ public class MCInjectorImpl
 {
     public LVTNaming naming = LVTNaming.STRIP;
     private Map<String, List<String>> abstractParameters = new HashMap<>();
+    public boolean useExcOrder;
 
     static void process(
             Path in, Path out,
             Path accIn, Path accOut,
             Path ctrIn, Path ctrOut,
             Path excIn, Path excOut,
-            LVTNaming naming)
+            LVTNaming naming, boolean useExcOrder)
         throws IOException
     {
         if (accIn != null)
@@ -65,6 +66,7 @@ public class MCInjectorImpl
 
         MCInjectorImpl mci = new MCInjectorImpl();
         mci.naming = naming;
+        mci.useExcOrder = useExcOrder;
 
         mci.processJar(in, out);
 
@@ -176,6 +178,7 @@ public class MCInjectorImpl
 
             ca = new AccessFixer(ca);
 
+            if (useExcOrder) ca = new ExceptionStripper(ca);
             ca = new ParameterAnnotationFixer(ca, this);
             ca = new InnerClassInitAdder(ca);
             ca = new ClassInitAdder(ca);
