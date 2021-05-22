@@ -30,7 +30,6 @@ public class MCInjector
     private Path ctrIn, ctrOut;
     private LVTNaming lvt;
     private boolean legacy;
-    private boolean disableParamFix;
 
     public MCInjector(Path fileIn, Path fileOut)
     {
