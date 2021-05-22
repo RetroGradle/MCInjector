@@ -29,7 +29,8 @@ public class MCInjector
     private Path accIn, accOut;
     private Path ctrIn, ctrOut;
     private LVTNaming lvt;
-    private boolean useExcOrder;
+    private boolean legacy;
+    private boolean disableParamFix;
 
     public MCInjector(Path fileIn, Path fileOut)
     {
@@ -114,12 +115,11 @@ public class MCInjector
         return this;
     }
 
-    public MCInjector useExcOrder(boolean useExcOrder)
+    public MCInjector legacy(boolean legacy)
     {
-        this.useExcOrder = useExcOrder;
+        this.legacy = legacy;
         return this;
     }
-
 
     public void process() throws IOException
     {
@@ -127,7 +127,7 @@ public class MCInjector
                                accIn, accOut,
                                ctrIn, ctrOut,
                                excIn, excOut,
-                               lvt, useExcOrder);
+                               lvt, legacy);
     }
 
     private static ValueConverter<Path> PATH_ARG = new ValueConverter<Path>()
@@ -181,7 +181,7 @@ public class MCInjector
         OptionSpec<Path>      ctrOut = parser.accepts("ctrOut").withRequiredArg().withValuesConvertedBy(PATH_ARG);
         OptionSpec<Level>     logLvl = parser.accepts("level") .withRequiredArg().withValuesConvertedBy(LEVEL_ARG).defaultsTo(Level.INFO);
         OptionSpec<LVTNaming> lvt    = parser.accepts("lvt").withRequiredArg().ofType(LVTNaming.class).defaultsTo(LVTNaming.STRIP);
-        OptionSpec<Boolean>   ordExc = parser.accepts("useExcOrder").withRequiredArg().ofType(boolean.class).defaultsTo(false);
+        OptionSpec<Boolean>   legacy = parser.accepts("legacy").withRequiredArg().ofType(boolean.class).defaultsTo(false);
 
         try
         {
@@ -202,24 +202,24 @@ public class MCInjector
             MCInjector.LOG.setLevel(o.valueOf(logLvl));
 
             LOG.info(MCInjector.VERSION);
-            LOG.info("Input:         " + o.valueOf(in));
-            LOG.info("Output:        " + o.valueOf(out));
-            LOG.info("Log:           " + o.valueOf(log));
-            LOG.info("Exceptions:    " + o.valueOf(exc));
-            LOG.info("               " + o.valueOf(excOut));
-            LOG.info("Access:        " + o.valueOf(acc));
-            LOG.info("               " + o.valueOf(accOut));
-            LOG.info("Constructors:  " + o.valueOf(ctr));
-            LOG.info("               " + o.valueOf(ctrOut));
-            LOG.info("LVT:           " + o.valueOf(lvt));
-            LOG.info("Use Exc Order :" + o.valueOf(ordExc));
+            LOG.info("Input:        " + o.valueOf(in));
+            LOG.info("Output:       " + o.valueOf(out));
+            LOG.info("Log:          " + o.valueOf(log));
+            LOG.info("Exceptions:   " + o.valueOf(exc));
+            LOG.info("              " + o.valueOf(excOut));
+            LOG.info("Access:       " + o.valueOf(acc));
+            LOG.info("              " + o.valueOf(accOut));
+            LOG.info("Constructors: " + o.valueOf(ctr));
+            LOG.info("              " + o.valueOf(ctrOut));
+            LOG.info("LVT:          " + o.valueOf(lvt));
+            LOG.info("Legacy:       " + o.valueOf(legacy));
 
             try
             {
                 new MCInjector(o.valueOf(in), o.valueOf(out))
                     .log()
                     .lvt(o.valueOf(lvt))
-                    .useExcOrder(o.valueOf(ordExc))
+                    .legacy(o.valueOf(legacy))
                     .log(o.valueOf(log))
                     .exceptions(o.valueOf(exc))
                     .exceptionsOut(o.valueOf(excOut))

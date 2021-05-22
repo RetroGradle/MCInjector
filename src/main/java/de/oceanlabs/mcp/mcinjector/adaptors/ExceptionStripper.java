@@ -24,6 +24,7 @@ public class ExceptionStripper extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions)
     {
+        // Only strip the exceptions present on the class if we have exceptions to add
         boolean hasExceptions = Exceptions.INSTANCE.getExceptions(className, name, desc).length != 0;
         return super.visitMethod(access, name, desc, signature, hasExceptions ? new String[0] : exceptions);
     }

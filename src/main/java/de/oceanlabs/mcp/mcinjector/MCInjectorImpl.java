@@ -44,14 +44,14 @@ public class MCInjectorImpl
 {
     public LVTNaming naming = LVTNaming.STRIP;
     private Map<String, List<String>> abstractParameters = new HashMap<>();
-    public boolean useExcOrder;
+    public boolean legacy;
 
     static void process(
             Path in, Path out,
             Path accIn, Path accOut,
             Path ctrIn, Path ctrOut,
             Path excIn, Path excOut,
-            LVTNaming naming, boolean useExcOrder)
+            LVTNaming naming, boolean legacy)
         throws IOException
     {
         if (accIn != null)
@@ -66,7 +66,7 @@ public class MCInjectorImpl
 
         MCInjectorImpl mci = new MCInjectorImpl();
         mci.naming = naming;
-        mci.useExcOrder = useExcOrder;
+        mci.legacy = legacy;
 
         mci.processJar(in, out);
 
@@ -178,8 +178,11 @@ public class MCInjectorImpl
 
             ca = new AccessFixer(ca);
 
-            if (useExcOrder) ca = new ExceptionStripper(ca);
-            ca = new ParameterAnnotationFixer(ca, this);
+            if (legacy) {
+                ca = new ExceptionStripper(ca);
+            } else {
+                ca = new ParameterAnnotationFixer(ca, this);
+            }
             ca = new InnerClassInitAdder(ca);
             ca = new ClassInitAdder(ca);
         }
