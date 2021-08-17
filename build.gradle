@@ -10,8 +10,10 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 group = 'de.oceanlabs.mcp'
-version = gitVersion()
+version = '0.2.2'
 targetCompatibility = sourceCompatibility = compileJava.targetCompatibility = compileJava.sourceCompatibility = '1.8'
+
+println("Version: " + version)
 
 ext {
     CHANGELOG = file("build/${project.name}-${project.version}-changelog.txt")
@@ -19,15 +21,6 @@ ext {
 
 repositories {
     mavenCentral()
-}
-
-def gitVersion() {
-    def desc = grgit.describe(longDescr: true).split('-') as List
-    def hash = desc.remove(desc.size() - 1)
-    def offset = desc.remove(desc.size() - 1)
-    def tag = desc.join('-')
-    def branch = grgit.branch.current().name 
-    return "${tag}.${offset}${t -> if (branch != 'master') t << '-' + branch}"
 }
 
 jar {
