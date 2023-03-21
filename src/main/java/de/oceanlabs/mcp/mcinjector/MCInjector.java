@@ -1,10 +1,7 @@
 package de.oceanlabs.mcp.mcinjector;
-import static joptsimple.internal.Reflection.invoke;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Method;
-import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -32,6 +29,7 @@ public class MCInjector
     private Path accIn, accOut;
     private Path ctrIn, ctrOut;
     private LVTNaming lvt;
+    private boolean legacy;
 
     public MCInjector(Path fileIn, Path fileOut)
     {
@@ -116,6 +114,11 @@ public class MCInjector
         return this;
     }
 
+    public MCInjector legacy(boolean legacy)
+    {
+        this.legacy = legacy;
+        return this;
+    }
 
     public void process() throws IOException
     {
@@ -123,7 +126,7 @@ public class MCInjector
                                accIn, accOut,
                                ctrIn, ctrOut,
                                excIn, excOut,
-                               lvt);
+                               lvt, legacy);
     }
 
     private static ValueConverter<Path> PATH_ARG = new ValueConverter<Path>()
@@ -177,6 +180,7 @@ public class MCInjector
         OptionSpec<Path>      ctrOut = parser.accepts("ctrOut").withRequiredArg().withValuesConvertedBy(PATH_ARG);
         OptionSpec<Level>     logLvl = parser.accepts("level") .withRequiredArg().withValuesConvertedBy(LEVEL_ARG).defaultsTo(Level.INFO);
         OptionSpec<LVTNaming> lvt    = parser.accepts("lvt").withRequiredArg().ofType(LVTNaming.class).defaultsTo(LVTNaming.STRIP);
+        OptionSpec<Boolean>   legacy = parser.accepts("legacy").withRequiredArg().ofType(boolean.class).defaultsTo(false);
 
         try
         {
@@ -207,12 +211,14 @@ public class MCInjector
             LOG.info("Constructors: " + o.valueOf(ctr));
             LOG.info("              " + o.valueOf(ctrOut));
             LOG.info("LVT:          " + o.valueOf(lvt));
+            LOG.info("Legacy:       " + o.valueOf(legacy));
 
             try
             {
                 new MCInjector(o.valueOf(in), o.valueOf(out))
                     .log()
                     .lvt(o.valueOf(lvt))
+                    .legacy(o.valueOf(legacy))
                     .log(o.valueOf(log))
                     .exceptions(o.valueOf(exc))
                     .exceptionsOut(o.valueOf(excOut))

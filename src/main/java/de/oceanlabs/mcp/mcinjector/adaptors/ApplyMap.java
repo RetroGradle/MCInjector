@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +73,10 @@ public class ApplyMap extends ClassVisitor
 
     private String[] processExceptions(String cls, String name, String desc, String[] exceptions)
     {
-        Set<String> set = new HashSet<>();
+        // Legacy Support requires the exception insertion order to be respected
+        // Seeing as Newer versions don't care as we sort the array at the end
+        // This is the easiest way to do so.
+        Set<String> set = new LinkedHashSet<>();
         for (String s :  Exceptions.INSTANCE.getExceptions(cls, name, desc))
             set.add(s);
         if (exceptions != null)
@@ -83,7 +87,7 @@ public class ApplyMap extends ClassVisitor
 
         if (set.size() > (exceptions == null ? 0 : exceptions.length))
         {
-            exceptions = set.stream().sorted().toArray(x -> new String[x]);
+            exceptions = injector.legacy ? set.toArray(new String[0]) : set.stream().sorted().toArray(String[]::new);
             Exceptions.INSTANCE.setExceptions(cls, name, desc, exceptions);
             MCInjector.LOG.log(Level.FINE, "    Adding Exceptions: " + String.join(", ", exceptions));
         }
